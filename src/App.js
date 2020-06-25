@@ -3,7 +3,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
-import Checkbox from '@material-ui/core/Checkbox';
 
 
 import './App.css';
@@ -60,41 +59,42 @@ const AuthorizedContainer = (props) => {
 
 
   return (
-    <React.Fragment>
-      <CssBaseline />
-      <h2>Login</h2>
-      <Container maxWidth="sm" style={{ padding: 20, textAlign: 'center' }}>
+    <div className="app-container">
+      <React.Fragment>
+        <CssBaseline />
+        <h2>Login</h2>
+        <Container maxWidth="sm" style={{ padding: 20, textAlign: 'center' }}>
 
 
 
-        <TextField
-          value={formLogin}
-          label="User Name"
-          onChange={onLoginChange}
-          variant="outlined"
-        />
+          <TextField
+            value={formLogin}
+            label="User Name"
+            onChange={onLoginChange}
+            variant="outlined"
+          />
 
-        <br />
-        <br />
-
-
-        <TextField
-          value={formPassword}
-          type="password"
-          label="Password"
-          onChange={onPasswordChange}
-          variant="outlined"
-        />
+          <br />
+          <br />
 
 
+          <TextField
+            value={formPassword}
+            type="password"
+            label="Password"
+            onChange={onPasswordChange}
+            variant="outlined"
+          />
 
 
 
 
-        <br />
-        <br />
-        <br />
-        {/* <FormControlLabel
+
+
+          <br />
+          <br />
+          <br />
+          {/* <FormControlLabel
           control={
             <Checkbox
               checked={state.checkedB}
@@ -114,14 +114,15 @@ const AuthorizedContainer = (props) => {
         <br />
         <br />
  */}
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={onLoginFormSubmit}>
-          Log in
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={onLoginFormSubmit}>
+            Log in
         </Button>
-      </Container>
-    </React.Fragment>
+        </Container>
+      </React.Fragment>
+    </div>
   );
 };
 
