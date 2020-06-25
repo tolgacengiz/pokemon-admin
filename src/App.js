@@ -142,7 +142,7 @@ const AuthorizedContainer = (props) => {
         </Button>
         </Container>
       </React.Fragment>
-    </div>
+    </div >
   );
 };
 
