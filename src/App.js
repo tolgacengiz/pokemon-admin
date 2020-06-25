@@ -14,8 +14,8 @@ const fakeFetch = (endpointUrl, dataPayload /* { username, password } */) => {
   console.log('Fetch payload', dataPayload.body);
 
   const testUser = {
-    firstName: 'Alex',
-    lastName: 'Nikitin'
+    firstName: 'Tolga',
+    lastName: 'Cengiz'
   };
 
   const promise = new Promise((res, rej) => {
