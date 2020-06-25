@@ -3,14 +3,16 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
-
-
 import './App.css';
-
 
 const fakeFetch = (endpointUrl, dataPayload /* { username, password } */) => {
   console.log('Fetch url', endpointUrl);
   console.log('Fetch payload', dataPayload.body);
+
+  const etalonValues = {
+    username: 'admin',
+    password: '12345'
+  };
 
   const testUser = {
     firstName: 'Tolga',
@@ -18,16 +20,26 @@ const fakeFetch = (endpointUrl, dataPayload /* { username, password } */) => {
   };
 
   const promise = new Promise((res, rej) => {
-    res(testUser);
+    setTimeout(() => {
+      const user = JSON.parse(dataPayload.body);
+
+      if (etalonValues.password === user.password && etalonValues.username === user.username) {
+        res(testUser);
+      } else {
+        res(null);
+      }
+    }, 3000);
   });
 
   return promise;
 };
 
 const AuthorizedContainer = (props) => {
+  let storedUser = localStorage.getItem('user');
   const [user, changeUser] = useState(null);
   const [formLogin, changeFormLoginValue] = useState('');
   const [formPassword, changeFormPasswordValue] = useState('');
+  const [fetching, setFetching] = useState(false);
 
   const onLoginChange = (event) => {
     changeFormLoginValue(event.target.value);
@@ -38,6 +50,7 @@ const AuthorizedContainer = (props) => {
   }
 
   const onLoginFormSubmit = () => {
+    setFetching(true);
     fakeFetch('http://mybackend.com/login', {
       method: 'POST',
       body: JSON.stringify({
@@ -46,6 +59,9 @@ const AuthorizedContainer = (props) => {
       }),
     }).then(user => {
       if (user) {
+        const userAsString = JSON.stringify(user);
+        localStorage.setItem('user', userAsString);
+
         changeUser(user);
       } else {
         changeUser(null);
@@ -71,6 +87,7 @@ const AuthorizedContainer = (props) => {
             value={formLogin}
             label="User Name"
             onChange={onLoginChange}
+            disabled={fetching}
             variant="outlined"
           />
 
@@ -83,6 +100,7 @@ const AuthorizedContainer = (props) => {
             type="password"
             label="Password"
             onChange={onPasswordChange}
+            disabled={fetching}
             variant="outlined"
           />
 
@@ -117,7 +135,9 @@ const AuthorizedContainer = (props) => {
           <Button
             variant="contained"
             color="primary"
-            onClick={onLoginFormSubmit}>
+            onClick={onLoginFormSubmit}
+            disabled={fetching}
+          >
             Log in
         </Button>
         </Container>
