@@ -5,41 +5,16 @@ import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
 import './App.css';
 
-const fakeFetch = (endpointUrl, dataPayload /* { username, password } */) => {
-  console.log('Fetch url', endpointUrl);
-  console.log('Fetch payload', dataPayload.body);
-
-  const etalonValues = {
-    username: 'admin',
-    password: '12345'
-  };
-
-  const testUser = {
-    firstName: 'Tolga',
-    lastName: 'Cengiz'
-  };
-
-  const promise = new Promise((res, rej) => {
-    setTimeout(() => {
-      const user = JSON.parse(dataPayload.body);
-
-      if (etalonValues.password === user.password && etalonValues.username === user.username) {
-        res(testUser);
-      } else {
-        res(null);
-      }
-    }, 3000);
-  });
-
-  return promise;
-};
 
 const AuthorizedContainer = (props) => {
-  let storedUser = localStorage.getItem('user');
-  const [user, changeUser] = useState(null);
+  const token = localStorage.getItem('token');
+
+  const [authResult, updateAuthResult] = useState({ token });
   const [formLogin, changeFormLoginValue] = useState('');
   const [formPassword, changeFormPasswordValue] = useState('');
   const [fetching, setFetching] = useState(false);
+
+  const [fetchError, setFetchError] = useState(null);
 
   const onLoginChange = (event) => {
     changeFormLoginValue(event.target.value);
@@ -51,98 +26,90 @@ const AuthorizedContainer = (props) => {
 
   const onLoginFormSubmit = () => {
     setFetching(true);
-    fakeFetch('http://mybackend.com/login', {
+
+    fetch('http://localhost:8080/login', {
       method: 'POST',
       body: JSON.stringify({
         username: formLogin,
         password: formPassword
       }),
-    }).then(user => {
-      if (user) {
-        const userAsString = JSON.stringify(user);
-        localStorage.setItem('user', userAsString);
+      headers: { "Content-Type": "application/json" }
+    })
+      .then(response => response.json())
+      .then(authResponse => {
+        // authResponse - { error, token }
 
-        changeUser(user);
-      } else {
-        changeUser(null);
-      }
-    });
+        if (authResponse.error) {
+          setFetchError(authResponse.error);
+        } else {
+          const { token } = authResponse;
+          localStorage.setItem('token', token);
+          updateAuthResult({ token });
+        }
+
+        setFetching(false);
+      })
+      .catch(err => {
+        console.log(err.message)
+      })
+      ;
   };
 
-  if (user) {
-    return <div>{props.children}</div>
+  if (authResult.token) {
+    const encodedTokenPayload = authResult.token.split('.')[0];
+    const decodedTokenPayload = atob(encodedTokenPayload);
+    const userData = JSON.parse(decodedTokenPayload);
+
+    return (
+      <div>
+        username: {userData.username}
+        <br />
+        firstName: {userData.firstName}
+        <br />
+        lastName: {userData.lastName}
+        <br />
+
+        <div>
+          {props.children}
+        </div>
+      </div>
+    );
   }
 
-
   return (
-    <div className="app-container">
-      <React.Fragment>
-        <CssBaseline />
-        <h2>Login</h2>
-        <Container maxWidth="sm" style={{ padding: 20, textAlign: 'center' }}>
-
-
-
-          <TextField
-            value={formLogin}
-            label="User Name"
-            onChange={onLoginChange}
-            disabled={fetching}
-            variant="outlined"
-          />
-
-          <br />
-          <br />
-
-
-          <TextField
-            value={formPassword}
-            type="password"
-            label="Password"
-            onChange={onPasswordChange}
-            disabled={fetching}
-            variant="outlined"
-          />
-
-
-
-
-
-
-          <br />
-          <br />
-          <br />
-          {/* <FormControlLabel
-          control={
-            <Checkbox
-              checked={state.checkedB}
-              onChange={handleChange}
-              name="checkedB"
-              color="primary"
-            />
-          }
-          label="Primary"
+    <React.Fragment>
+      <CssBaseline />
+      <Container maxWidth="sm" style={{ padding: 20, textAlign: 'center' }}>
+        <TextField
+          value={formLogin}
+          label="User Name"
+          onChange={onLoginChange}
+          disabled={fetching}
         />
-        <Checkbox
 
-          name="checkedB"
-          color="primary"
-          label="Remember me"
-        />
         <br />
         <br />
- */}
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={onLoginFormSubmit}
-            disabled={fetching}
-          >
-            Log in
+
+        <TextField
+          value={formPassword}
+          type="password"
+          label="Password"
+          onChange={onPasswordChange}
+          disabled={fetching}
+        />
+
+        <br />
+        <br />
+        <br />
+
+        <Button
+          onClick={onLoginFormSubmit}
+          disabled={fetching}
+        >
+          Log in
         </Button>
-        </Container>
-      </React.Fragment>
-    </div >
+      </Container>
+    </React.Fragment>
   );
 };
 
