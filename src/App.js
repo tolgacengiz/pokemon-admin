@@ -62,12 +62,12 @@ const AuthorizedContainer = (props) => {
 
     return (
       <div>
-        username: {userData.username}
+        {/* username: {userData.username}
         <br />
         firstName: {userData.firstName}
         <br />
         lastName: {userData.lastName}
-        <br />
+        <br /> */}
 
         <div>
           {props.children}
@@ -77,47 +77,127 @@ const AuthorizedContainer = (props) => {
   }
 
   return (
-    <React.Fragment>
-      <CssBaseline />
-      <Container maxWidth="sm" style={{ padding: 20, textAlign: 'center' }}>
-        <TextField
-          value={formLogin}
-          label="User Name"
-          onChange={onLoginChange}
-          disabled={fetching}
-        />
+    <div className="app-container">
+      <React.Fragment>
+        <CssBaseline />
+        <Container maxWidth="sm" style={{ padding: 20, textAlign: 'center' }}>
+          <TextField
+            value={formLogin}
+            label="User Name"
+            onChange={onLoginChange}
+            disabled={fetching}
+            variant="outlined"
+          />
 
-        <br />
-        <br />
+          <br />
+          <br />
 
-        <TextField
-          value={formPassword}
-          type="password"
-          label="Password"
-          onChange={onPasswordChange}
-          disabled={fetching}
-        />
+          <TextField
+            value={formPassword}
+            type="password"
+            label="Password"
+            onChange={onPasswordChange}
+            disabled={fetching}
+            variant="outlined"
+          />
 
-        <br />
-        <br />
-        <br />
+          <br />
+          <br />
+          <br />
 
-        <Button
-          onClick={onLoginFormSubmit}
-          disabled={fetching}
-        >
-          Log in
+          <Button
+            onClick={onLoginFormSubmit}
+            disabled={fetching}
+          >
+            Log in
         </Button>
-      </Container>
-    </React.Fragment>
+        </Container>
+      </React.Fragment>
+    </div>
   );
 };
+
+const NewPostFormContainer = () => {
+  const [title, changeTitle] = useState('');
+  const [brief_text, changeBrief] = useState('');
+  const [detailed_text, changeDetailed] = useState('');
+
+  const [fetchStatus, updateFetchStatus] = useState('IDLE');
+
+  const changeTitleHandler = (event) => changeTitle(event.target.value);
+  const changeBriefHandler = (event) => changeBrief(event.target.value);
+  const changeDetailedHandler = (event) => changeDetailed(event.target.value);
+
+  const onFormSubmit = (event) => {
+    event.preventDefault();
+    updateFetchStatus('STARTED');
+
+    fetch('http://localhost:8080/news', {
+      method: 'POST',
+      body: JSON.stringify({
+        title,
+        brief_text,
+        detailed_text,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem('token')}`
+      },
+    })
+      .then(data => {
+        console.log('All good');
+        updateFetchStatus('SUCCEED');
+      })
+      .catch(err => {
+        console.log(err.message);
+        updateFetchStatus('FAILED');
+      });
+  }
+
+  const fetchingNow = fetchStatus === 'STARTED';
+
+  return (
+    <form onSubmit={onFormSubmit}>
+      <input
+        type="text"
+        value={title}
+        onChange={changeTitleHandler}
+        placeholder="title"
+        disabled={fetchingNow}
+      />
+      <br />
+      <br />
+
+      <input
+        type="text"
+        value={brief_text}
+        onChange={changeBriefHandler}
+        placeholder="brief_text"
+        disabled={fetchingNow}
+      />
+      <br />
+      <br />
+
+      <input
+        type="text"
+        value={detailed_text}
+        onChange={changeDetailedHandler}
+        placeholder="detailed_text"
+        disabled={fetchingNow}
+      />
+      <br />
+      <br />
+
+      <input type="submit" value="Post" disabled={fetchingNow} />
+    </form>
+  );
+}
 
 const App = () => {
   return (
     <div className="App">
       <AuthorizedContainer>
-        You are logged in!
+        <NewPostFormContainer />
       </AuthorizedContainer>
     </div>
   );
